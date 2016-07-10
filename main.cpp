@@ -5,8 +5,11 @@
 //
 // =================================================================
 
+#include <cstdio>
 #include <iostream>
 #include <string>
+
+#define BUFFER_SIZE_MAX 30000
 
 using namespace std;
 
@@ -16,7 +19,7 @@ using namespace std;
 
 class BrainfuckInterpreter {
   public:
-    char memory[30000]; // 30K ought to be enough for anybody.
+    char memory[BUFFER_SIZE_MAX]; // 30K ought to be enough for anybody.
     char *data_pointer; // Point to the current location of data.
     const char *ip; // Point to the current location through the script.
 
@@ -84,6 +87,9 @@ class BrainfuckInterpreter {
     }
 
     bool evaluate() {
+      cout << "\033[32mEvaluating Brainfuck buffer with contents:" << endl << endl;
+      cout << ip << endl << "\033[0m";
+
       while (*ip) {
         switch (*ip) {
           case '>': increment_data_pointer(); break;
@@ -142,12 +148,28 @@ void print_usage() {
   cout << "   -h                    Get usage information." << endl;
 }
 
+// Execute a script with a given file name.
+// 
+// @return A boolean indicating whether execution was successful.
 bool execute_script(char *file_name) {
-  char buffer[256] = "++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.";
-  BrainfuckInterpreter interpreter = BrainfuckInterpreter(buffer);
+  FILE *file_handle = fopen(file_name, "rb");
+  if (!file_handle) {
+    printf("Error: could not open file %s\n", file_name);
+    return false;
+  }
+
+  char *file_contents = new char[BUFFER_SIZE_MAX];
+  int result = fread(file_contents, sizeof(char), BUFFER_SIZE_MAX, file_handle);
+
+  if (result == 0) {
+    return false;
+  }
+  
+  BrainfuckInterpreter interpreter = BrainfuckInterpreter(file_contents);
   interpreter.evaluate();
 
-  return false;
+  // TODO: Return a useful value once error handling is better defined.
+  return true;
 }
 
 int main(int argc, char **argv) {
