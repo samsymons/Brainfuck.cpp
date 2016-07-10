@@ -8,7 +8,15 @@ using namespace std;
 // =================================================================
 
 class BrainfuckInterpreter {
+  public:
+    char memory[30000]; // 30K ought to be enough for anybody.
+    char *data_pointer; // Point to the current location of data.
+    const char *ip; // Point to the current location through the script.
 
+    void Brainfuck(const char script_data[]) {
+      data_pointer = memory;
+      ip = script_data;
+    }
 };
 
 // =================================================================
