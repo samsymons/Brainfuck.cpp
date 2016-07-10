@@ -1,3 +1,10 @@
+// =================================================================
+//
+// A simple interpreter for the Brainfuck language.
+// Implemented based on https://en.wikipedia.org/wiki/Brainfuck.
+//
+// =================================================================
+
 #include <iostream>
 #include <string>
 
@@ -13,9 +20,86 @@ class BrainfuckInterpreter {
     char *data_pointer; // Point to the current location of data.
     const char *ip; // Point to the current location through the script.
 
-    void Brainfuck(const char script_data[]) {
+    BrainfuckInterpreter(const char script_data[]) {
       data_pointer = memory;
       ip = script_data;
+    }
+
+    void increment_data_pointer() {
+      data_pointer++;
+    }
+
+    void decrement_data_pointer() {
+      data_pointer--;
+    }
+
+    void increment_data_byte() {
+      (*data_pointer)++;
+    }
+
+    void decrement_data_byte() {
+      (*data_pointer)--;
+    }
+
+    void output_byte() {
+      cout << *data_pointer;
+    }
+
+    void input_byte() {
+      cin >> *data_pointer;
+    }
+
+    void opening_bracket() {
+      if (*data_pointer != '\0') {
+        return;
+      }
+
+      int counter = 1;
+
+      do {
+        ip++;
+
+        if (*ip == '[') {
+          counter++;
+        }
+        else if (*ip == ']') {
+          counter--;
+        }
+      } while (counter != 0);
+    }
+
+    void closing_bracket() {
+      int counter = 0;
+
+      do {
+        if (*ip == '[') {
+          counter++;
+        }
+        else if (*ip == ']') {
+          counter--;
+        }
+
+        ip--;
+      } while (counter != 0);
+    }
+
+    bool evaluate() {
+      while (*ip) {
+        switch (*ip) {
+          case '>': increment_data_pointer(); break;
+          case '<': decrement_data_pointer(); break;
+          case '+': increment_data_byte(); break;
+          case '-': decrement_data_byte(); break;
+          case '.': output_byte(); break;
+          case ',': input_byte(); break;
+          case '[': opening_bracket(); break;
+          case ']': closing_bracket(); break;
+        }
+        
+        ip++;
+      }
+
+      return true;
     }
 };
 
@@ -59,7 +143,9 @@ void print_usage() {
 }
 
 bool execute_script(char *file_name) {
-  cout << "Executing " << file_name << endl;
+  char buffer[256] = "++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.";
+  BrainfuckInterpreter interpreter = BrainfuckInterpreter(buffer);
+  interpreter.evaluate();
 
   return false;
 }
